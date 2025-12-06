@@ -1,10 +1,21 @@
-public class StaffUsers extends Users{
-    
+public class StaffUsers extends Users {
+
     private String department;
 
-    // get info
-    // set info
-        // can set info for any patient except id & username
-    
-    // print user info using toString override ?
+    public StaffUsers(int id, String username){
+        super(id, username);
+    }
+
+    public String getDepartment() {
+        return department;
+    }
+
+    public void setDepartment(String department) {
+        this.department = department;
+    }
+
+    @Override
+    public String toString(){
+        return "";
+    }
 }
