@@ -21,7 +21,8 @@ public class Driver {
         if (userType == null) {
             System.out.println("Invalid login.");
         } else if (userType.equals("PATIENT")) {
-            new PatientUsers(); // or call the method that opens that menu
+            PatientUsers patientUser = new PatientUsers(); // instantiate patient user object
+            patientUser.printUserInfo();
         } else if (userType.equals("STAFF")) {
             new StaffUsers(); // same idea
         }
