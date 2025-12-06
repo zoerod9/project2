@@ -1,6 +1,7 @@
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Scanner;
 
 public class Login {
@@ -29,7 +30,6 @@ public class Login {
 
     // Helper method to check a CSV file
     private static Users checkCredentials(String filename, String username, String password) {
-        System.out.println("attempting to log in with creds" + username + password);
         try (BufferedReader br = new BufferedReader(new FileReader(filename))) {
             String line;
 
@@ -37,7 +37,7 @@ public class Login {
             while ((line = br.readLine()) != null) {
                 // make a scanner for that line
                 try (Scanner lineScanner = new Scanner(line);) {
-                    // split each line's value based on a comma0
+                    // split each line's value based on a comma
                     lineScanner.useDelimiter(",");
 
                     int id = lineScanner.nextInt();
@@ -49,8 +49,6 @@ public class Login {
                     String other = lineScanner.next();
 
                     if (username.equals(lineUsername) && password.equals(linePassword)) {
-                        // user match
-                        System.out.println("user match");
                         if (PATIENT_FILE.equals(filename)) {
                             PatientUsers user = new PatientUsers(id, lineUsername);
                             user.setPassword(linePassword);
@@ -76,6 +74,47 @@ public class Login {
 
         return null; // No match found
     }
-}
 
-// upon successful login, set up and return patient manager
+    // return the list of patients
+    private static ArrayList<PatientUsers> getPatients() {
+        ArrayList<PatientUsers> patients = new ArrayList<>();
+        try (BufferedReader br = new BufferedReader(new FileReader(PATIENT_FILE))) {
+            String line;
+
+            // for each line in the file
+            while ((line = br.readLine()) != null) {
+                // make a scanner for that line
+                try (Scanner lineScanner = new Scanner(line);) {
+                    // split each line's value based on a comma
+                    lineScanner.useDelimiter(",");
+
+                    int id = lineScanner.nextInt();
+                    String lineUsername = lineScanner.next();
+                    String linePassword = lineScanner.next();
+                    String lineName = lineScanner.next();
+                    String lineEmail = lineScanner.next();
+                    String notes = lineScanner.next();
+                    
+                    // create a patient per line
+                    PatientUsers patient = new PatientUsers(id, lineUsername);
+                    patient.setPassword(linePassword);
+                    patient.setName(lineName);
+                    patient.setEmail(lineEmail);
+                    patient.setTreatment_notes(notes);
+                    
+                    // add it to the list
+                    patients.add(patient);
+                }
+            }
+        } catch (IOException e) {
+            System.err.println("Error reading CSV file: " + e.getMessage());
+        }
+
+        return patients;
+    }
+
+    public static PatientManager setupPatientManager(Users user) {
+        ArrayList<PatientUsers> patientList = getPatients();
+        return new PatientManager(user, patientList);
+    }
+}

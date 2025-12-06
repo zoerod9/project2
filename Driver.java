@@ -18,31 +18,35 @@ public class Driver {
 
             System.out.print("Enter password: ");
             String password = scanner.nextLine();
-            System.out.println("attempting login");
             loggedInUser = Login.authenticateData(username, password);
-            if(loggedInUser == null){
+            if (loggedInUser == null) {
                 System.out.println("Invalid creds, try again");
             }
         }
 
-        System.out.println("you're logged on, back in main");
+        System.out.println("Welcome, " + loggedInUser.getName());
+        PatientManager patientManager = Login.setupPatientManager(loggedInUser);
 
-        // if (userType == null) {
-        // System.out.println("Invalid login.");
-        // } else if (userType.equals("PATIENT")) {
-        // PatientUsers patientUser = new PatientUsers(); // instantiate patient user
-        // object
-        // patientUser.printUserInfo();
-        // } else if (userType.equals("STAFF")) {
-        // new StaffUsers(); // same idea
-        // }
+        // interact with users to ask which functions to perform
+        boolean exit = false;
+        while (!exit) {
+            System.out.println("Please enter a command:");
+            System.out.println("0 - Exit");
+            String command = scanner.next();
+            // the commands
+            final String EXIT = "0";
+            switch (command) {
+                case EXIT:
+                    System.out.println("Exiting");
+                    exit = true;
+                    break;
+                
+                default:
+                    System.out.println("Bad command, please try again");
+                    break;
+            }
+        }
 
         scanner.close();
     }
-    // instantiate/call/execute Login
-
-    // upon successful login, patient manager object is created to help
-    // perform tasks
-
-    // user interaction. pop-up menus/prompts
 }
