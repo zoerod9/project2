@@ -14,19 +14,19 @@ public class Driver {
         Users loggedInUser = null;
         while (loggedInUser == null) {
             // staff creds
-            // String username = "sstrange";
-            // String password = "meditationmagic";
+            String username = "sstrange";
+            String password = "meditationmagic";
 
-            // patient creds
-            String username = "sallyw";
-            String password = "password123";
+            // // patient creds
+            // String username = "sallyw";
+            // String password = "password123";
 
             // // good ol login
             // System.out.print("Enter username: ");
             // String username = scanner.nextLine();
-
             // System.out.print("Enter password: ");
             // String password = scanner.nextLine();
+
             loggedInUser = Login.authenticateData(username, password);
             if (loggedInUser == null) {
                 System.out.println("Invalid creds, try again");
@@ -35,7 +35,6 @@ public class Driver {
 
         System.out.println("Welcome, " + loggedInUser.getName());
 
-        System.out.println(loggedInUser.toString());
         PatientManager patientManager = Login.setupPatientManager(loggedInUser);
 
         // interact with users to ask which functions to perform

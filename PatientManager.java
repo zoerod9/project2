@@ -17,6 +17,7 @@ public class PatientManager {
     public PatientManager(Users user) {
         this.loggedInUser = user;
         this.patients = getPatients();
+        sortPatientsById();
         if (user instanceof PatientUsers) {
             for (PatientUsers patientUser : patients) {
                 if (patientUser.getId() == user.getId()) {
@@ -61,8 +62,6 @@ public class PatientManager {
             System.err.println("Error reading CSV file: " + e.getMessage());
         }
 
-        // todo sort patients by ID
-
         return patients;
     }
 
@@ -91,7 +90,7 @@ public class PatientManager {
                 current.setEmail(newValue);
                 break;
             case "treatment_notes":
-                if(isStaff()){
+                if (isStaff()) {
                     current.setTreatment_notes(newValue);
                 } else {
                     throw new Exception("Only staff may edit treatment notes");
@@ -121,14 +120,25 @@ public class PatientManager {
             throw new Exception("Patients cannot look up other patient info");
         }
 
+        sortPatientsById();
+
         boolean found = false;
-        for (PatientUsers patient : patients) {
-            if (patientId.equals(String.valueOf(patient.getId()))) {
+        int beginIndex = 0;
+        int endIndex = patients.size();
+        int midIndex;
+        while ((beginIndex <= endIndex) && !found) {
+            midIndex = (beginIndex + endIndex) / 2;
+            if (patientId.compareTo(String.valueOf(patients.get(midIndex).getId())) == 0) {
+                this.current = patients.get(midIndex);
+                this.current.printInfo();
                 found = true;
-                this.current = patient;
-                patient.printInfo();
+            } else if (patientId.compareTo(String.valueOf(patients.get(midIndex).getId())) < 0) {
+                endIndex = midIndex - 1;
+            } else if (patientId.compareTo(String.valueOf(patients.get(midIndex).getId())) > 0) {
+                beginIndex = midIndex + 1;
             }
         }
+
         if (!found) {
             System.out.println("Patient not found");
         }
@@ -160,7 +170,7 @@ public class PatientManager {
     private void reportPatientListById(String fileName) {
         sortPatientsById();
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(fileName))) {
-            writer.write("Patient name, email, ID");
+            writer.write("Patient ID, name, email");
             writer.newLine();
             for (PatientUsers patient : patients) {
                 writer.write(patient.getId() + ", " + patient.getName() + ", " + patient.getEmail());
