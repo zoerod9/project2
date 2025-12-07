@@ -13,13 +13,13 @@ public class Driver {
 
         Users loggedInUser = null;
         while (loggedInUser == null) {
-            // // staff creds
-            String username = "sstrange";
-            String password = "meditationmagic";
+            // staff creds
+            // String username = "sstrange";
+            // String password = "meditationmagic";
 
-            // // patient creds
-            // String username = "sallyw";
-            // String password = "password123";
+            // patient creds
+            String username = "sallyw";
+            String password = "password123";
 
             // // good ol login
             // System.out.print("Enter username: ");
@@ -93,7 +93,11 @@ public class Driver {
                     }
                     System.out.println("Enter new value:");
                     String newValue = scanner.nextLine();
-                    patientManager.editProfile(attribute, newValue);
+                    try {
+                        patientManager.editProfile(attribute, newValue);
+                    } catch (Exception e) {
+                        System.out.println(e.getMessage());
+                    }
                     break;
                 case REPORTS:
                     System.out.println("Enter file name for reports:");
@@ -143,6 +147,7 @@ public class Driver {
         attributes.add("password");
         attributes.add("name");
         attributes.add("email");
+        attributes.add("treatment_notes");
         for (String patientAttribute : attributes) {
             if (patientAttribute.equals(attribute)) {
                 return true;

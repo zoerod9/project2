@@ -18,7 +18,11 @@ public class PatientManager {
         this.loggedInUser = user;
         this.patients = getPatients();
         if (user instanceof PatientUsers) {
-            this.current = (PatientUsers) user;
+            for (PatientUsers patientUser : patients) {
+                if (patientUser.getId() == user.getId()) {
+                    this.current = patientUser;
+                }
+            }
         }
     }
 
@@ -75,7 +79,7 @@ public class PatientManager {
         return loggedInUser instanceof PatientUsers;
     }
 
-    public void editProfile(String attribute, String newValue) {
+    public void editProfile(String attribute, String newValue) throws Exception {
         switch (attribute) {
             case "name":
                 current.setName(newValue);
@@ -86,8 +90,15 @@ public class PatientManager {
             case "email":
                 current.setEmail(newValue);
                 break;
+            case "treatment_notes":
+                if(isStaff()){
+                    current.setTreatment_notes(newValue);
+                } else {
+                    throw new Exception("Only staff may edit treatment notes");
+                }
+                break;
             default:
-                System.out.println("Attribute " + attribute + "not supported!");
+                System.out.println("Attribute " + attribute + " not supported!");
                 break;
         }
 
@@ -201,15 +212,43 @@ public class PatientManager {
     }
 
     private void sortPatientsByEmail() {
-        // TODO Auto-generated method stub
+        int i, j;
+        for (i = 1; i < patients.size(); i++) {
+            PatientUsers tmp = patients.get(i);
+            j = i;
+            while ((j > 0) && (patients.get(j - 1).getEmail().compareTo(tmp.getEmail()) > 0)) {
+                patients.set(j, patients.get(j - 1));
+                j--;
+            }
+            patients.set(j, tmp);
+        }
     }
 
     private void sortPatientsById() {
-        // TODO Auto-generated method stub
+        int i, j;
+        for (i = 1; i < patients.size(); i++) {
+            PatientUsers tmp = patients.get(i);
+            j = i;
+            while ((j > 0) && (patients.get(j - 1).getId() > tmp.getId())) {
+                patients.set(j, patients.get(j - 1));
+                j--;
+            }
+            patients.set(j, tmp);
+        }
+
     }
 
     private void sortPatientsByName() {
-        // TODO Auto-generated method stub
+        int i, j;
+        for (i = 1; i < patients.size(); i++) {
+            PatientUsers tmp = patients.get(i);
+            j = i;
+            while ((j > 0) && (patients.get(j - 1).getName().compareTo(tmp.getName()) > 0)) {
+                patients.set(j, patients.get(j - 1));
+                j--;
+            }
+            patients.set(j, tmp);
+        }
     }
 
 }
