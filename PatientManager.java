@@ -1,48 +1,215 @@
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Scanner;
 
 public class PatientManager {
 
+    private static final String PATIENT_FILE = "patient.csv";
+
     private Users loggedInUser;
     private ArrayList<PatientUsers> patients;
+    private PatientUsers current;
 
-    public PatientManager(Users user, ArrayList<PatientUsers> patients){
+    public PatientManager(Users user) {
         this.loggedInUser = user;
-        this.patients = patients;
+        this.patients = getPatients();
+        if (user instanceof PatientUsers) {
+            this.current = (PatientUsers) user;
+        }
     }
 
-    public Users getLoggedInUser() {
-        return loggedInUser;
-    }
+    // return the list of patients
+    private static ArrayList<PatientUsers> getPatients() {
+        ArrayList<PatientUsers> patients = new ArrayList<>();
+        try (BufferedReader br = new BufferedReader(new FileReader(PATIENT_FILE))) {
+            String line;
 
-    public void setLoggedInUser(Users loggedInUser) {
-        this.loggedInUser = loggedInUser;
-    }
+            // for each line in the file
+            while ((line = br.readLine()) != null) {
+                // make a scanner for that line
+                try (Scanner lineScanner = new Scanner(line);) {
+                    // split each line's value based on a comma
+                    lineScanner.useDelimiter(",");
 
-    public ArrayList<PatientUsers> getPatients() {
+                    int id = lineScanner.nextInt();
+                    String lineUsername = lineScanner.next();
+                    String linePassword = lineScanner.next();
+                    String lineName = lineScanner.next();
+                    String lineEmail = lineScanner.next();
+                    String notes = lineScanner.next();
+
+                    // create a patient per line
+                    PatientUsers patient = new PatientUsers(id, lineUsername);
+                    patient.setPassword(linePassword);
+                    patient.setName(lineName);
+                    patient.setEmail(lineEmail);
+                    patient.setTreatment_notes(notes);
+
+                    // add it to the list
+                    patients.add(patient);
+                }
+            }
+        } catch (IOException e) {
+            System.err.println("Error reading CSV file: " + e.getMessage());
+        }
+
+        // todo sort patients by ID
+
         return patients;
     }
 
-    public void setPatients(ArrayList<PatientUsers> patients) {
-        this.patients = patients;
+    public void viewProfile() {
+        System.out.println("Viewing user profile");
+        loggedInUser.printInfo();
     }
 
-    // instansiate upon successful login
+    public boolean isStaff() {
+        return loggedInUser instanceof StaffUsers;
+    }
 
-    // hold user that is currently logged on as general user class
-    // display information
+    public boolean isPatient() {
+        return loggedInUser instanceof PatientUsers;
+    }
 
-    // load an arrayList of all patients
-    // instantiate a new Patient and add it to the ArrayList for EVERY
-    // Patient in the file)
-    // sort pts by id
+    public void editProfile(String attribute, String newValue) {
+        switch (attribute) {
+            case "name":
+                current.setName(newValue);
+                break;
+            case "password":
+                current.setPassword(newValue);
+                break;
+            case "email":
+                current.setEmail(newValue);
+                break;
+            default:
+                System.out.println("Attribute " + attribute + "not supported!");
+                break;
+        }
 
-    // view/lookup pts
-    // throw error for patient users
-    // binary search
-    // if found, set as 'currently viewed'
+        commitPatientFile();
+    }
 
-    // edit current pt
-    // update in arrayList
-    // changes should be reflected in patient file
-    // overwrite entire patient file, print entire arrayList
+    private void commitPatientFile() {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(PATIENT_FILE))) {
+            for (PatientUsers patientUsers : patients) {
+                writer.write(patientUsers.toString());
+                writer.newLine();
+            }
+        } catch (IOException e) {
+            System.err.println("Error writing to file: " + e.getMessage());
+        }
+    }
+
+    public void viewPatientInfo(String patientId) throws Exception {
+        if (isPatient()) {
+            throw new Exception("Patients cannot look up other patient info");
+        }
+
+        boolean found = false;
+        for (PatientUsers patient : patients) {
+            if (patientId.equals(String.valueOf(patient.getId()))) {
+                found = true;
+                this.current = patient;
+                patient.printInfo();
+            }
+        }
+        if (!found) {
+            System.out.println("Patient not found");
+        }
+    }
+
+    public PatientUsers getCurrent() {
+        return current;
+    }
+
+    public void printReport(String fileName, String reportType) {
+        switch (reportType) {
+            case "A":
+                reportPatientListById(fileName);
+                break;
+            case "B":
+                reportPatientListByName(fileName);
+                break;
+            case "C":
+                reportAllEmails(fileName);
+                break;
+            case "D":
+                reportProfile(fileName);
+                break;
+            default:
+                break;
+        }
+    }
+
+    private void reportPatientListById(String fileName) {
+        sortPatientsById();
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(fileName))) {
+            writer.write("Patient name, email, ID");
+            writer.newLine();
+            for (PatientUsers patient : patients) {
+                writer.write(patient.getId() + ", " + patient.getName() + ", " + patient.getEmail());
+                writer.newLine();
+            }
+        } catch (IOException e) {
+            System.err.println("Error writing to file: " + e.getMessage());
+        }
+    }
+
+    private void reportPatientListByName(String fileName) {
+        sortPatientsByName();
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(fileName))) {
+            writer.write("Patient name, email, ID");
+            writer.newLine();
+            for (PatientUsers patient : patients) {
+                writer.write(patient.getId() + ", " + patient.getName() + ", " + patient.getEmail());
+                writer.newLine();
+            }
+        } catch (IOException e) {
+            System.err.println("Error writing to file: " + e.getMessage());
+        }
+    }
+
+    private void reportProfile(String fileName) {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(fileName))) {
+            writer.write(loggedInUser.getInfoString());
+        } catch (IOException e) {
+            System.err.println("Error writing to file: " + e.getMessage());
+        }
+    }
+
+    private void reportAllEmails(String fileName) {
+        sortPatientsByEmail();
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(fileName))) {
+            writer.write("Current user email");
+            writer.newLine();
+            writer.write(loggedInUser.getEmail());
+            writer.newLine();
+            writer.write("Patient emails");
+            writer.newLine();
+            for (PatientUsers patient : patients) {
+                writer.write(patient.getEmail());
+                writer.newLine();
+            }
+        } catch (IOException e) {
+            System.err.println("Error writing to file: " + e.getMessage());
+        }
+    }
+
+    private void sortPatientsByEmail() {
+        // TODO Auto-generated method stub
+    }
+
+    private void sortPatientsById() {
+        // TODO Auto-generated method stub
+    }
+
+    private void sortPatientsByName() {
+        // TODO Auto-generated method stub
+    }
+
 }

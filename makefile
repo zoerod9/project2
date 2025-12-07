@@ -1,6 +1,7 @@
 # before you commit
 clean:
 	rm *.class
+	rm report.txt
 
 # to run the project
 run:

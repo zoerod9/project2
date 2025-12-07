@@ -6,17 +6,7 @@ public abstract class Users {
     private String name;
     private String email;
 
-    // // print user info
-    // public String printUserInfo(){
-    // System.out.println(id);
-    // System.out.println(username);
-    // System.out.println(password);
-    // System.out.println(name);
-    // System.out.println(email);
-    // return"printuserinfo";
-    // }
-
-    public Users(int id, String username){
+    public Users(int id, String username) {
         this.id = id;
         this.username = username;
     }
@@ -53,7 +43,25 @@ public abstract class Users {
         return email;
     }
 
-    public String toString(){
-        return "";
+    public String toString() {
+        return id + "," + username + "," + password + "," + name + "," + email;
+    }
+
+    protected void printInfo() {
+        System.out.println("- User info:");
+        System.out.println("  id: " + id);
+        System.out.println("  username: " + username);
+        System.out.println("  password: " + password);
+        System.out.println("  name: " + name);
+        System.out.println("  email: " + email);
+    };
+
+    public String getInfoString() {
+        return "- User info:" + "\n" +
+                "  id: " + id + "\n" +
+                "  username: " + username + "\n" +
+                "  password: " + password + "\n" +
+                "  name: " + name + "\n" +
+                "  email: " + email + "\n";
     }
 }

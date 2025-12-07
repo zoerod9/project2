@@ -2,7 +2,7 @@ public class StaffUsers extends Users {
 
     private String department;
 
-    public StaffUsers(int id, String username){
+    public StaffUsers(int id, String username) {
         super(id, username);
     }
 
@@ -15,7 +15,17 @@ public class StaffUsers extends Users {
     }
 
     @Override
-    public String toString(){
-        return "";
+    public void printInfo() {
+        super.printInfo();
+        System.out.println("- Staff info:");
+        System.out.println("  department: " + department);
     }
+
+    @Override
+    public String getInfoString() {
+        return super.getInfoString() +
+                "- Staff info:" + "\n" +
+                "  department: " + department + "\n";
+    }
+
 }
